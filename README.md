@@ -23,10 +23,18 @@ Decrypt      Decrypt firmware
 Fetch        Fetch latest firmware
 ```
 ### Examples
-Download: `./Syndical.Application -m Download -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f` \
-Decrypt: `./Syndical.Application -m Decrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f` \
-Fetch latest firmware: `./Syndical.Application -m Fetch -M SM-A207F -r SER` \
-\
+Download: 
+```
+./Syndical.Application -m Download -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
+```
+Decrypt: 
+```
+./Syndical.Application -m Decrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
+```
+Fetch latest firmware: 
+```
+./Syndical.Application -m Fetch -M SM-A207F -r SER
+```
 If `--factory` is present, `BINARY_NATURE` is set to 1 instead of 0. 
 
 ## Credits
