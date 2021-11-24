@@ -7,7 +7,7 @@ Written purely in C#. [SamLoader](https://github.com/nlscc/samloader) was, of co
 ```
   -m, --mode                Required. Which mode I should use
   -V, --encrypt-version     (Default: V4) Encryption method version
-  -v, --firmware-version    Firmware version
+  -v, --firmware-version     Firmware version
   -i, --input               File to decrypt
   -o, --output              Filename for decrypted/downloaded file
   -M, --model               Required. Device model
