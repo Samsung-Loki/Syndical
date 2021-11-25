@@ -3,6 +3,7 @@
 ![badges](https://img.shields.io/github/stars/TheAirBlow/Syndical.svg)
 ![badges](https://img.shields.io/github/issues/TheAirBlow/Syndical.svg)
 ![badges](https://github.com/TheAirBlow/Syndical/actions/workflows/build.yml/badge.svg)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4cf0cbd38c014349a3612c43711279ce)](https://www.codacy.com/gh/TheAirBlow/Syndical/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=TheAirBlow/Syndical&amp;utm_campaign=Badge_Grade)
 # Syndical
 This is an alternative to [SamLoader](https://github.com/nlscc/samloader) - cleaner code, easier to understand and tamper with. \
 Written purely in C#. [SamLoader](https://github.com/nlscc/samloader) was, of course, the base of Syndical, but impemented differently.
