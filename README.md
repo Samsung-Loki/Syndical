@@ -1,3 +1,8 @@
+<img src="https://img.shields.io/github/contributors/TheAirBlow/Syndical.svg"/>
+<img src="https://img.shields.io/github/forks/TheAirBlow/Syndical.svg"/>
+<img src="https://img.shields.io/github/stars/TheAirBlow/Syndical.svg"/>
+<img src="https://img.shields.io/github/issues/TheAirBlow/Syndical.svg"/>
+<img src="https://github.com/TheAirBlow/Syndical/actions/workflows/build.yml/badge.svg"/>
 # Syndical
 This is an alternative to [SamLoader](https://github.com/nlscc/samloader) - cleaner code, easier to understand and tamper with. \
 Written purely in C#. [SamLoader](https://github.com/nlscc/samloader) was, of course, the base of Syndical, but impemented differently.
