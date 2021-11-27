@@ -38,7 +38,7 @@ Decrypt:
 ```
 ./Syndical.Application -m Decrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
 ```
-Fetch latest firmware: 
+Fetch device firmware list: 
 ```
 ./Syndical.Application -m Fetch -M SM-A207F -r SER
 ```
