@@ -1,4 +1,6 @@
-# Common IntelliJ Platform excludes
+# Syndical-specific stuff
+*.zip*
+stacktrace.log
 
 # User specific
 **/.idea/**/workspace.xml
