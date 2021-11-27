@@ -46,8 +46,10 @@ namespace Syndical.Library
         /// <param name="data">Request body</param>
         /// <param name="query">Query parameters</param>
         /// <param name="method">HTTP Method</param>
+        /// <param name="start">Range header</param>
         /// <returns>Response body</returns>
-        public HttpWebResponse SendRequest([NotNull] string path, [NotNull] string data = "", string query = null, [NotNull] string method = "POST", bool cloud = false)
+        public HttpWebResponse SendRequest([NotNull] string path, [NotNull] string data = "", string query = null, [NotNull] string method = "POST", 
+            bool cloud = false, long start = 0)
         {
             var url = cloud 
                 ? CloudFusServerLink + path
@@ -55,10 +57,13 @@ namespace Syndical.Library
             if (!string.IsNullOrEmpty(query))
                 url += $"?{query}";
             var req = (HttpWebRequest)WebRequest.Create(url);
+            req.ReadWriteTimeout = 0x61a8;
+            req.Timeout = 0x61a8;
             req.Method = method;
             req.Headers.Add("Authorization", $"FUS nonce=\"{_encryptedNonce.ToUtf8String()}\", " +
                                              $"signature=\"{_token.ToUtf8String()}\", nc=\"\", type=\"\", realm=\"\", newauth=\"1\"");
             req.Headers.Add("Cache-Control", "no-cache");
+            req.Headers.Add("Range", $"{start}-");
             if (!string.IsNullOrEmpty(data)) {
                 byte[] buf = Encoding.ASCII.GetBytes(data); // ASCII here, why?
                 using (Stream stream = req.GetRequestStream())
@@ -139,5 +144,30 @@ namespace Syndical.Library
             doc.LoadXml(str);
             return FirmwareInfo.FromXml(doc, version);
         }
+        
+        /// <summary>
+        /// Send a firmware binary download init request
+        /// </summary>
+        /// <param name="info">Firmare info</param>
+        public void InitializeDownload([NotNull] FirmwareInfo info)
+        {
+            var xml = BuildFusXml(new Dictionary<string, string> {
+                {"BINARY_FILE_NAME", info.FileName},
+                {"LOGIC_CHECK", Crypto.GetLogicCheck(string.Join("",         // Logic check out of filename without
+                    info.FileName.Split(".")[0].TakeLast(16).ToArray())!  // the extension and use only 
+                    .ToUtf8Bytes(), _nonce).ToUtf8String()}                       // last 16 characters
+            }); 
+            
+            SendRequest("NF_DownloadBinaryInitForMass.do", xml);
+        }
+
+        /// <summary>
+        /// Download firmware binary
+        /// </summary>
+        /// <param name="info">Firmare info</param>
+        /// <param name="start">Range header</param>
+        /// <returns>Response stream</returns>
+        public HttpWebResponse DownloadFirmware([NotNull] FirmwareInfo info, long start = 0)
+            => SendRequest("NF_DownloadBinaryForMass.do", query: $"file={info.CloudModelRoot}{info.FileName}", method: "GET", cloud: true, start: 0);
     }
 }

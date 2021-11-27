@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.IO;
+using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using CommandLine;
 using Spectre.Console;
@@ -16,7 +19,7 @@ namespace Syndical.Application
     public static class Program
     {
         [Flags]
-        private enum Mode { Download, Decrypt, Fetch }
+        private enum Mode { Download, Decrypt, DownloadDecrypt, Fetch }
 
         /// <summary>
         /// Commandline options
@@ -63,12 +66,116 @@ namespace Syndical.Application
         {
             try {
                 Parser.Default.ParseArguments<Options>(args).WithParsed(o => {
-                    // Goodbye old shit!
                     switch (o.Mode)
                     {
                         case Mode.Decrypt:
                             break;
                         case Mode.Download:
+                            AnsiConsole.MarkupLine($"[bold]Device:[/] {o.Model}/{o.Region}");
+                            if (string.IsNullOrEmpty(o.FirmwareVersion)) {
+                                AnsiConsole.MarkupLine("[red]Firmware version required![/]");
+                                return;
+                            }
+                            o.FirmwareVersion = o.FirmwareVersion.NormalizeVersion();
+                            AnsiConsole.MarkupLine($"[bold]Firmware:[/] {o.FirmwareVersion}");
+                            
+                            AnsiConsole.MarkupLine("[yellow]Connecting to FUS server...[/]");
+                            var clientDownload = new FusClient();
+                            var typeDownload = o.FactoryFirmware
+                                ? FirmwareInfo.FirmwareType.Factory
+                                : FirmwareInfo.FirmwareType.Home;
+                            
+                            AnsiConsole.MarkupLine("[yellow]Verifying firmware version...[/]");
+                            if (!Fetcher.FirmwareExists(o.Model, o.Region, o.FirmwareVersion, true)) {
+                                AnsiConsole.MarkupLine("[red]Firmware does not exist![/]");
+                                return;
+                            }
+                            
+                            AnsiConsole.MarkupLine("[yellow]Fetching firmware information...[/]");
+                            var info = clientDownload.GetFirmwareInformation(o.FirmwareVersion, o.Model,
+                                o.Region, typeDownload);
+                            
+                            AnsiConsole.MarkupLine("[yellow]Initializing download...[/]");
+                            clientDownload.InitializeDownload(info);
+
+                            var dest = string.IsNullOrEmpty(o.OutputFilename) ? info.FileName : o.OutputFilename;
+                            var start = File.Exists(dest) ? new FileInfo(dest).Length : 0;
+
+                            AnsiConsole.Progress()
+                                .Columns(new TaskDescriptionColumn(),
+                                    new ProgressBarColumn(),
+                                    new PercentageColumn(),
+                                    new DownloadedColumn(),
+                                    new TransferSpeedColumn(),
+                                    new RemainingTimeColumn(),
+                                    new ElapsedTimeColumn())
+                                .Start(ctx =>
+                                {
+                                    var res = clientDownload.DownloadFirmware(info, start);
+                                    var block = 800;
+                                    var realSize = long.Parse(res.Headers["Content-Length"]!);
+                                    AnsiConsole.MarkupLine($"[yellow]Download from {start} to {realSize}[/]");
+                                    if (realSize != info.FileSize)
+                                        AnsiConsole.MarkupLine(
+                                            $"[yellow]Content-Length is different than reported size: {realSize}/{info.FileSize}[/]");
+                                    var task = ctx.AddTask("[yellow]Downloading firmware[/]", maxValue: realSize);
+                                    var hash = ctx.AddTask("[cyan]Verifying hash[/]", false, realSize)
+                                        .IsIndeterminate();
+                                    task.Increment(start);
+                                    if (start < realSize)
+                                    {
+                                        using var data = res.GetResponseStream();
+                                        using var file = new FileStream(dest, FileMode.OpenOrCreate);
+                                        bool stop = false;
+                                        file.Seek(start, SeekOrigin.Begin);
+                                        var buf = new byte[block];
+                                        long readTotal = 0;
+                                        while (!stop)
+                                        {
+                                            int read = data.Read(buf, 0, buf.Length);
+                                            if (realSize - readTotal < block) stop = true;
+                                            file.Write(buf, 0, read);
+                                            task.Increment(read);
+                                            readTotal += read;
+                                        }
+                                    }
+                                    else if (start > realSize)
+                                    {
+                                        throw new InvalidOperationException(
+                                            "Overflow! File size is bigger than expected.");
+                                    }
+                                    else
+                                    {
+                                        AnsiConsole.MarkupLine($"[yellow]Skipping firmware download...[/]");
+                                    }
+
+                                    task.Description = "[green]Downloading firmware[/]";
+                                    task.StopTask();
+                                    hash.StartTask();
+                                    hash.IsIndeterminate(false);
+                                    hash.Description = "[yellow]Verifying hash[/]";
+                                    using var crc = new Crc32();
+                                    using (Stream file = new FileStream(dest, FileMode.Open, FileAccess.Read))
+                                    {
+                                        bool stop = false;
+                                        var buf = new byte[block];
+                                        long readTotal = 0;
+                                        while (!stop)
+                                        {
+                                            int read = file.Read(buf, 0, buf.Length);
+                                            if (realSize - readTotal < block) stop = true;
+                                            if (stop) crc.TransformFinalBlock(buf, 0, read);
+                                            else crc.TransformBlock(buf, 0, read, buf, 0);
+                                            hash.Increment(read);
+                                            readTotal += read;
+                                        }
+                                    }
+
+                                    hash.Description = crc.Hash!.SequenceEqual(info.CrcChecksum)
+                                        ? "[green]Hash is valid![/]"
+                                        : "[red]Hash mismatch![/]";
+                                    hash.StopTask();
+                                });
                             break;
                         case Mode.Fetch:
                             AnsiConsole.MarkupLine($"[bold]Device:[/] {o.Model}/{o.Region}");
@@ -78,8 +185,11 @@ namespace Syndical.Application
                                 ? FirmwareInfo.FirmwareType.Factory
                                 : FirmwareInfo.FirmwareType.Home;
                             AnsiConsole.Progress()
-                                .Columns(new TaskDescriptionColumn(), new ProgressBarColumn(), new PercentageColumn(),
-                                    new ElapsedTimeColumn(), new SpinnerColumn(Spinner.Known.Arc))
+                                .Columns(new TaskDescriptionColumn(), 
+                                    new ProgressBarColumn(), 
+                                    new PercentageColumn(),
+                                    new ElapsedTimeColumn(), 
+                                    new SpinnerColumn(Spinner.Known.Arc))
                                 .Start(ctx => {
                                     var task = ctx.AddTask("[cyan]Fetching firmware list[/]").IsIndeterminate();
                                     var list = Fetcher.GetDeviceFirmwares(o.Model, o.Region);

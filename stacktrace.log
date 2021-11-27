@@ -1,0 +1,14 @@
+System.InvalidOperationException: Overflow! File size is bigger than expected.
+   at Syndical.Application.Program.<>c__DisplayClass2_1.<Main>b__1(ProgressContext ctx) in /home/theairblow/RiderProjects/Syndical/Syndical.Application/Program.cs:line 143
+   at Spectre.Console.Progress.<>c__DisplayClass25_0.<Start>b__0(ProgressContext ctx) in /_/src/Spectre.Console/Live/Progress/Progress.cs:line 70
+   at Spectre.Console.Progress.<>c__DisplayClass27_0.<<StartAsync>b__0>d.MoveNext() in /_/src/Spectre.Console/Live/Progress/Progress.cs:line 103
+--- End of stack trace from previous location ---
+   at Spectre.Console.Progress.<>c__DisplayClass28_0`1.<<StartAsync>b__0>d.MoveNext() in /_/src/Spectre.Console/Live/Progress/Progress.cs:line 138
+--- End of stack trace from previous location ---
+   at Spectre.Console.Internal.DefaultExclusivityMode.Run[T](Func`1 func) in /_/src/Spectre.Console/Internal/DefaultExclusivityMode.cs:line 44
+   at Spectre.Console.Progress.StartAsync[T](Func`2 action) in /_/src/Spectre.Console/Live/Progress/Progress.cs:line 121
+   at Spectre.Console.Progress.StartAsync(Func`2 action) in /_/src/Spectre.Console/Live/Progress/Progress.cs:line 101
+   at Spectre.Console.Progress.Start(Action`1 action) in /_/src/Spectre.Console/Live/Progress/Progress.cs:line 74
+   at Syndical.Application.Program.<>c.<Main>b__2_0(Options o) in /home/theairblow/RiderProjects/Syndical/Syndical.Application/Program.cs:line 103
+   at CommandLine.ParserResultExtensions.WithParsed[T](ParserResult`1 result, Action`1 action)
+   at Syndical.Application.Program.Main(String[] args) in /home/theairblow/RiderProjects/Syndical/Syndical.Application/Program.cs:line 67

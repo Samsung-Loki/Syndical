@@ -97,7 +97,7 @@ namespace Syndical.Library
         /// <summary>
         /// Body -> Put -> BINARY_CRC
         /// </summary>
-        public long CrcChecksum;
+        public byte[] CrcChecksum;
 
         /// <summary>
         /// Parse XML
@@ -164,7 +164,7 @@ namespace Syndical.Library
             // info.CrcChecksum
             if (body.SelectSingleNode("./Put/BINARY_CRC/Data")?.InnerText == null)
                 throw new InvalidOperationException("Invalid FirmwareInfo XML!");
-            info.CrcChecksum = long.Parse(body.SelectSingleNode("./Put/BINARY_CRC/Data")?.InnerText!);
+            info.CrcChecksum = BitConverter.GetBytes(Convert.ToUInt32(body.SelectSingleNode("./Put/BINARY_CRC/Data")?.InnerText)).Reverse().ToArray();
             // info.DecryptType
             info.DecryptType = (DecryptVersion)int.Parse(info.FileName!.TakeLast(1).ToArray()[0].ToString());
             // info.DecryptionKey
