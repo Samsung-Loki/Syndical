@@ -9,6 +9,11 @@ This is an alternative to [SamLoader](https://github.com/nlscc/samloader) - clea
 Written purely in C#. [SamLoader](https://github.com/nlscc/samloader) was, of course, the base of Syndical, but impemented differently. \
 Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3El/syndical).
 
+## Why I should use Syndical?
+1) It looks a lot better than any other firmware downloaders
+2) Download & Decrypt is a lot faster, as it won't download the entire file and then only decrypt it.
+3) Because I'll steal your liver 
+
 ## Screenshots
 ### Download mode
 ![Screenshot_20211127_201356](https://user-images.githubusercontent.com/68467762/143686936-bea4fc37-76ba-4050-a7dc-89dda131abeb.png)
@@ -16,7 +21,7 @@ Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3E
 ![Screenshot_20211127_201618](https://user-images.githubusercontent.com/68467762/143686992-f2bcc648-7538-44eb-acb0-c4f1ba5e5446.png)
 ### Decrypt mode
 Sorry! It is in development.
-### DownloadDecrypt mode
+### Download & Decrypt mode
 Sorry! It is in development.
 
 ## How to use
