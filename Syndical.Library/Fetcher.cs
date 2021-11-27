@@ -5,7 +5,7 @@ using System.Xml;
 namespace Syndical.Library
 {
     /// <summary>
-    /// Samsung device fetcher
+    /// FOTA Cloud fetcher
     /// </summary>
     public static class Fetcher
     {
@@ -34,7 +34,7 @@ namespace Syndical.Library
         /// <param name="region">Device region</param>
         /// <returns>Firmware list MXL</returns>
         /// <exception cref="InvalidOperationException">Device does not exist</exception>
-        public static XmlDocument GetFirmwareList(string model, string region)
+        public static DeviceFirmwaresXml GetDeviceFirmwares(string model, string region)
         {
             if (!DeviceExists(model, region))
                 throw new InvalidOperationException("Device does not exist!");
@@ -42,7 +42,28 @@ namespace Syndical.Library
             var res = (HttpWebResponse)req.GetResponse();
             var doc = new XmlDocument();
             doc.LoadXml(res.GetString());
-            return doc;
+            return DeviceFirmwaresXml.FromXml(doc);
+        }
+
+        /// <summary>
+        /// Get firmware list XML
+        /// </summary>
+        /// <param name="model">Device model</param>
+        /// <param name="region">Device region</param>
+        /// <param name="version">Firmware version</param>
+        /// <param name="normalized">Is version normalized</param>
+        /// <returns>Does firmware exist</returns>
+        public static bool FirmwareExists(string model, string region, string version, bool normalized)
+        {
+            var info = GetDeviceFirmwares(model, region);
+            if (normalized && info.Latest.NormalizedVersion == version) return true;
+            if (!normalized && info.Latest.Version == version) return true;
+            foreach (var fw in info.Old) {
+                if (normalized && fw.NormalizedVersion == version) return true;
+                if (!normalized && fw.Version == version) return true;
+            }
+
+            return false;
         }
     }
 }

@@ -1,8 +1,11 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Syndical.Library
 {
@@ -42,18 +45,26 @@ namespace Syndical.Library
         /// </summary>
         /// <param name="source">Source</param>
         /// <returns>MD5 hashsum digest</returns>
-        public static string GetMd5Hash(this string source)
+        public static byte[] GetMd5Hash(this string source)
         {
             // Use input string to calculate MD5 hash
             using var md5 = MD5.Create();
             byte[] inputBytes = source.ToUtf8Bytes();
             byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-            // Convert the byte array to hexadecimal string
-            StringBuilder sb = new StringBuilder();
-            foreach (var t in hashBytes)
-                sb.Append(t.ToString("X2"));
-            return sb.ToString();
+            return hashBytes;
+        }
+        
+        /// <summary>
+        /// Get MD5 hashsum digest
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>MD5 hashsum digest</returns>
+        public static byte[] GetMd5Hash(this byte[] source)
+        {
+            // Use input string to calculate MD5 hash
+            using var md5 = MD5.Create();
+            byte[] hashBytes = md5.ComputeHash(source);
+            return hashBytes;
         }
 
         /// <summary>

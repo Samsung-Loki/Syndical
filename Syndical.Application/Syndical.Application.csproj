@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="BouncyCastle.NetCore" Version="1.8.10" />
       <PackageReference Include="CommandLineParser" Version="2.8.0" />
       <PackageReference Include="Serilog" Version="2.10.0" />
       <PackageReference Include="Serilog.Exceptions" Version="8.0.0" />

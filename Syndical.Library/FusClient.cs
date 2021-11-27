@@ -15,8 +15,17 @@ namespace Syndical.Library
     /// <summary>
     /// FUS client
     /// </summary>
+    [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     public class FusClient
     {
+        // Known endpoints and URLs
+        public const string InitializeDownloadEndpoint = "NF_DownloadBinaryInitForMass.do";
+        public const string BinaryInformationEndpoint = "NF_DownloadBinaryInform.do";
+        public const string BinaryDownloadEndpoint = "NF_DownloadBinaryForMass.do";
+        public const string CloudFusServerLink = "http://cloud-neofussvr.sslcs.cdngc.net/";
+        public const string FusServerLink = "https://neofussvr.sslcs.cdngc.net/";
+        
+        // Authentication stuff
         private byte[] _encryptedNonce = Array.Empty<byte>();
         private byte[] _nonce = Array.Empty<byte>();
         private byte[] _token = Array.Empty<byte>();
@@ -40,10 +49,9 @@ namespace Syndical.Library
         /// <returns>Response body</returns>
         public HttpWebResponse SendRequest([NotNull] string path, [NotNull] string data = "", string query = null, [NotNull] string method = "POST", bool cloud = false)
         {
-            Globals.Logger.Information($"[FusClient] Sending {method} request to {path}");
             var url = cloud 
-                ? $"http://cloud-neofussvr.sslcs.cdngc.net/{path}"
-                : $"https://neofussvr.sslcs.cdngc.net/{path}";
+                ? CloudFusServerLink + path
+                : FusServerLink + path;
             if (!string.IsNullOrEmpty(query))
                 url += $"?{query}";
             var req = (HttpWebRequest)WebRequest.Create(url);
@@ -74,22 +82,11 @@ namespace Syndical.Library
         }
 
         /// <summary>
-        /// Download a file
-        /// </summary>
-        /// <param name="filename">Filename</param>
-        /// <returns>Response stream</returns>
-        public HttpWebResponse DownloadFile([NotNull] string filename)
-        {
-            return SendRequest("NF_DownloadBinaryForMass.do", query: $"file={filename}", method: "GET", cloud: true);
-        }
-
-        /// <summary>
         /// Build a XML for a FUS request
         /// </summary>
         /// <param name="data">Data dictionary</param>
-        /// <param name="logicCheck">LOGIC_CHECK value</param>
         /// <returns>XML string</returns>
-        public static string BuildFusXml([NotNull] Dictionary<string, string> data, [NotNull] string logicCheck)
+        public static string BuildFusXml([NotNull] Dictionary<string, string> data)
         {
             // Create an XML document
             var doc = new XmlDocument();
@@ -102,8 +99,6 @@ namespace Syndical.Library
             // Build body root
             var bodyRoot = doc.CreateElement("FUSBody");
             var body = doc.CreateElement("Put");
-            // LOGIC_CHECK is always required
-            data.Add("LOGIC_CHECK", logicCheck);
             // Build body data
             foreach (KeyValuePair<string, string> pair in data) {
                 var el = doc.CreateElement(pair.Key);
@@ -119,41 +114,30 @@ namespace Syndical.Library
             doc.AppendChild(root);
             return doc.OuterXml;
         }
-
+        
         /// <summary>
-        /// Send a binary init request
-        /// </summary>
-        /// <param name="filename">Filename</param>
-        public void SendBinaryInit([NotNull] string filename)
-        {
-            var xml = BuildFusXml(new Dictionary<string, string> {
-                {"BINARY_FILE_NAME", filename}
-            }, Crypto.GetLogicCheck(string.Join("", filename.Split(".")[0].TakeLast(16).ToArray())!.ToUtf8Bytes(), _nonce).ToUtf8String()); 
-            // Logic check out of filename without the extension and use only last 16 characters
-            SendRequest("NF_DownloadBinaryInitForMass.do", xml);
-        }
-
-        /// <summary>
-        /// Get binary information XML
+        /// Get firmware information
         /// </summary>
         /// <param name="version">Firmware version</param>
         /// <param name="model">Device model</param>
         /// <param name="region">Device region</param>
-        /// <param name="factory">Factory firmware (BINARU_NATURE = 1)</param>
-        /// <returns>Binary information XML</returns>
-        public XmlDocument GetBinaryInfo(string version, string model, string region, bool factory)
+        /// <param name="type">Firmware type</param>
+        /// <returns>Firmware information</returns>
+        public FirmwareInfo GetFirmwareInformation(string version, string model, string region, FirmwareInfo.FirmwareType type)
         {
             var xml = BuildFusXml(new Dictionary<string, string> {
                 {"ACCESS_MODE", "2"},
-                {"BINARY_NATURE", factory ? "1" : "0"},
-                {"CLIENT_PRODUCT", "Smart Switch"},
+                {"CLIENT_PRODUCT", "Amogus!!1!"},
+                {"BINARY_NATURE", type == FirmwareInfo.FirmwareType.Factory ? "1" : "0"},
                 {"DEVICE_FW_VERSION", version},
                 {"DEVICE_LOCAL_CODE", region},
-                {"DEVICE_MODEL_NAME", model}
-            }, Crypto.GetLogicCheck(version.ToUtf8Bytes(), _nonce).ToUtf8String());
+                {"DEVICE_MODEL_NAME", model},
+                {"LOGIC_CHECK", Crypto.GetLogicCheck(version.ToUtf8Bytes(), _nonce).ToUtf8String()}
+            });
             var doc = new XmlDocument();
-            doc.LoadXml(SendRequest("NF_DownloadBinaryInform.do", xml).GetString());
-            return doc;
-        } 
+            var str = SendRequest("NF_DownloadBinaryInform.do", xml).GetString();
+            doc.LoadXml(str);
+            return FirmwareInfo.FromXml(doc, version);
+        }
     }
 }

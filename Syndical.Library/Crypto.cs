@@ -115,19 +115,21 @@ namespace Syndical.Library
         /// <param name="region">Device region</param>
         /// <returns>Version 2 encryption key</returns>
         public static byte[] GetVersion2Key(string version, string model, string region)
-            => Encoding.UTF8.GetBytes($"{region}:{model}:{version}".GetMd5Hash());
+            => $"{region}:{model}:{version}".GetMd5Hash();
 
         /// <summary>
         /// Get key for version 4 encryption
         /// </summary>
-        /// <param name="factory">Factory firmware (BINARY_NATURE = 1)</param>
+        /// <param name="type">Firmware type (Binary nature)</param>
         /// <param name="xml">Binary information</param>
         /// <returns>Version 4 encryption key</returns>
-        public static byte[] GetVersion4Key(bool factory, XmlDocument xml)
+        public static byte[] GetVersion4Key(FirmwareInfo.FirmwareType type, XmlDocument xml)
         {
-            var input = xml.DocumentElement?.SelectSingleNode("./FUSBody/Results/LATEST_FW_VERSION/Data")?.Value;
-            var nonce = xml.DocumentElement?.SelectSingleNode(factory ? "./FUSBody/Put/LOGIC_VALUE_FACTORY/Data" : "./FUSBody/Put/LOGIC_VALUE_HOME/Data")?.Value;
-            return GetLogicCheck(input.ToUtf8Bytes(), nonce.ToUtf8Bytes()).ToUtf8String().GetMd5Hash().ToUtf8Bytes();
+            var input = xml.DocumentElement?.SelectSingleNode("./FUSBody/Results/LATEST_FW_VERSION/Data")?.InnerText;
+            var nonce = xml.DocumentElement?.SelectSingleNode(type == FirmwareInfo.FirmwareType.Factory 
+                ? "./FUSBody/Put/LOGIC_VALUE_FACTORY/Data" 
+                : "./FUSBody/Put/LOGIC_VALUE_HOME/Data")?.InnerText;
+            return GetLogicCheck(input.ToUtf8Bytes(), nonce.ToUtf8Bytes()).GetMd5Hash();
         }
     }
 }
