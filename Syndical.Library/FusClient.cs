@@ -132,7 +132,7 @@ namespace Syndical.Library
         {
             var xml = BuildFusXml(new Dictionary<string, string> {
                 {"ACCESS_MODE", "2"},
-                {"CLIENT_PRODUCT", "Amogus!!1!"},
+                {"CLIENT_PRODUCT", "Amogus (SUPER SUS)!!1!"},
                 {"BINARY_NATURE", type == FirmwareInfo.FirmwareType.Factory ? "1" : "0"},
                 {"DEVICE_FW_VERSION", version},
                 {"DEVICE_LOCAL_CODE", region},
