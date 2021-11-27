@@ -52,9 +52,6 @@ namespace Syndical.Application
             
             [Option('f', "factory", Required = false, HelpText = "Download factory firmware (BINARY_NATURE = 1)")]
             public bool FactoryFirmware { get; set; }
-            
-            [Option('b', "bypass-file-check", Required = false, HelpText = "Bypasses file size check in Decryption mode")]
-            public bool BypassFileCheck { get; set; }
         }
         
         /// <summary>
@@ -68,7 +65,73 @@ namespace Syndical.Application
                 Parser.Default.ParseArguments<Options>(args).WithParsed(o => {
                     switch (o.Mode)
                     {
+                        case Mode.DownloadDecrypt:
+                            break;
                         case Mode.Decrypt:
+                            AnsiConsole.MarkupLine($"[bold]Device:[/] {o.Model}/{o.Region}");
+                            if (string.IsNullOrEmpty(o.FirmwareVersion)) {
+                                AnsiConsole.MarkupLine("[red]Firmware version required![/]");
+                                return;
+                            }
+                            o.FirmwareVersion = o.FirmwareVersion.NormalizeVersion();
+                            AnsiConsole.MarkupLine($"[bold]Firmware:[/] {o.FirmwareVersion}");
+                            
+                            AnsiConsole.MarkupLine("[yellow]Connecting to FUS server...[/]");
+                            var clientDecrypt = new FusClient();
+                            var typeDecrypt = o.FactoryFirmware
+                                ? FirmwareInfo.FirmwareType.Factory
+                                : FirmwareInfo.FirmwareType.Home;
+                            
+                            AnsiConsole.MarkupLine("[yellow]Verifying firmware version...[/]");
+                            if (!Fetcher.FirmwareExists(o.Model, o.Region, o.FirmwareVersion, true)) {
+                                AnsiConsole.MarkupLine("[red]Firmware does not exist![/]");
+                                return;
+                            }
+                            
+                            AnsiConsole.MarkupLine("[yellow]Fetching firmware information...[/]");
+                            var infoDecrypt = clientDecrypt.GetFirmwareInformation(o.FirmwareVersion, o.Model,
+                                o.Region, typeDecrypt);
+                            
+                            var srcDecrypt = string.IsNullOrEmpty(o.InputFilename) ? infoDecrypt.FileName : o.InputFilename;
+                            var destDecrypt = string.IsNullOrEmpty(o.OutputFilename) ? infoDecrypt.FileName
+                                .Replace(".enc2", "").Replace(".enc4", "") : o.OutputFilename;
+                            
+                            AnsiConsole.Progress()
+                                .Columns(new TaskDescriptionColumn(),
+                                    new ProgressBarColumn(),
+                                    new PercentageColumn(),
+                                    new DownloadedColumn(),
+                                    new TransferSpeedColumn(),
+                                    new RemainingTimeColumn(),
+                                    new ElapsedTimeColumn())
+                                .Start(ctx => {
+                                    var block = 800;
+                                    var realSize = new FileInfo(srcDecrypt).Length;
+                                    if (realSize != infoDecrypt.FileSize)
+                                        AnsiConsole.MarkupLine(
+                                            $"[yellow]File size is different than reported size: {realSize}/{infoDecrypt.FileSize}[/]");
+                                    var task = ctx.AddTask("[yellow]Downloading firmware[/]", maxValue: realSize);
+                                    using var srcStream = new FileStream(srcDecrypt, FileMode.Open, FileAccess.Read);
+                                    using var destStream = new FileStream(destDecrypt, FileMode.OpenOrCreate, FileAccess.Write);
+                                    using var rj = new RijndaelManaged();
+                                    rj.Mode = CipherMode.ECB;
+                                    rj.Padding = PaddingMode.PKCS7;
+                                    using var decryptor = new CryptoStream(srcStream, rj.CreateDecryptor(), CryptoStreamMode.Read);
+                                    bool stop = false;
+                                    var buf = new byte[block];
+                                    long readTotal = 0;
+                                    while (!stop)
+                                    {
+                                        int read = decryptor.Read(buf, 0, buf.Length);
+                                        if (realSize - readTotal < block) stop = true;
+                                        destStream.Write(buf, 0, read);
+                                        task.Increment(read);
+                                        readTotal += read;
+                                    }
+
+                                    task.Description = "[green]Decrypting firmware[/]";
+                                    task.StopTask();
+                                });
                             break;
                         case Mode.Download:
                             AnsiConsole.MarkupLine($"[bold]Device:[/] {o.Model}/{o.Region}");
@@ -109,11 +172,11 @@ namespace Syndical.Application
                                     new TransferSpeedColumn(),
                                     new RemainingTimeColumn(),
                                     new ElapsedTimeColumn())
-                                .Start(ctx =>
-                                {
+                                .Start(ctx => {
                                     var res = clientDownload.DownloadFirmware(info, start);
                                     var block = 800;
                                     var realSize = long.Parse(res.Headers["Content-Length"]!);
+                                    var toWrite = realSize - start;
                                     AnsiConsole.MarkupLine($"[yellow]Download from {start} to {realSize}[/]");
                                     if (realSize != info.FileSize)
                                         AnsiConsole.MarkupLine(
@@ -122,8 +185,7 @@ namespace Syndical.Application
                                     var hash = ctx.AddTask("[cyan]Verifying hash[/]", false, realSize)
                                         .IsIndeterminate();
                                     task.Increment(start);
-                                    if (start < realSize)
-                                    {
+                                    if (start < realSize) {
                                         using var data = res.GetResponseStream();
                                         using var file = new FileStream(dest, FileMode.OpenOrCreate);
                                         bool stop = false;
@@ -133,19 +195,15 @@ namespace Syndical.Application
                                         while (!stop)
                                         {
                                             int read = data.Read(buf, 0, buf.Length);
-                                            if (realSize - readTotal < block) stop = true;
+                                            if (toWrite - readTotal < block) stop = true;
                                             file.Write(buf, 0, read);
                                             task.Increment(read);
                                             readTotal += read;
                                         }
-                                    }
-                                    else if (start > realSize)
-                                    {
+                                    } else if (start > realSize) {
                                         throw new InvalidOperationException(
                                             "Overflow! File size is bigger than expected.");
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         AnsiConsole.MarkupLine($"[yellow]Skipping firmware download...[/]");
                                     }
 
@@ -155,13 +213,11 @@ namespace Syndical.Application
                                     hash.IsIndeterminate(false);
                                     hash.Description = "[yellow]Verifying hash[/]";
                                     using var crc = new Crc32();
-                                    using (Stream file = new FileStream(dest, FileMode.Open, FileAccess.Read))
-                                    {
+                                    using (Stream file = new FileStream(dest, FileMode.Open, FileAccess.Read)) {
                                         bool stop = false;
                                         var buf = new byte[block];
                                         long readTotal = 0;
-                                        while (!stop)
-                                        {
+                                        while (!stop) {
                                             int read = file.Read(buf, 0, buf.Length);
                                             if (realSize - readTotal < block) stop = true;
                                             if (stop) crc.TransformFinalBlock(buf, 0, read);
