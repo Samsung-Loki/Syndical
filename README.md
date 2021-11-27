@@ -10,24 +10,14 @@ Written purely in C#. [SamLoader](https://github.com/nlscc/samloader) was, of co
 Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3El/syndical).
 
 ## Screenshots
-<details open>
-<summary>Download mode</summary>
-<br>
+### Download mode
 ![Screenshot_20211127_201356](https://user-images.githubusercontent.com/68467762/143686936-bea4fc37-76ba-4050-a7dc-89dda131abeb.png)
-</details>
-<details open>
-<summary>Fetch mode</summary>
-<br>
+### Fetch mode
 ![Screenshot_20211127_201618](https://user-images.githubusercontent.com/68467762/143686992-f2bcc648-7538-44eb-acb0-c4f1ba5e5446.png)
-</details>
-<summary>Decrypt mode</summary>
-<br>
+### Decrypt mode
 Sorry! It is in development.
-</details>
-<summary>DownloadDecrypt mode</summary>
-<br>
+### DownloadDecrypt mode
 Sorry! It is in development.
-</details>
 
 ## How to use
 ### Arguments
