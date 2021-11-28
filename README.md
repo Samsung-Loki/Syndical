@@ -16,7 +16,7 @@ Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3E
 
 ## Warning
 SamLoader's way of resuming is broken. \
-Alo Samsung ships only two last firmware versions, Fetch is proof.
+Also Samsung ships only two last firmware versions, Fetch is proof.
 
 ## Screenshots
 ### Download mode
