@@ -96,6 +96,8 @@ namespace Syndical.Application
                             var srcDecrypt = string.IsNullOrEmpty(o.InputFilename) ? infoDecrypt.FileName : o.InputFilename;
                             var destDecrypt = string.IsNullOrEmpty(o.OutputFilename) ? infoDecrypt.FileName
                                 .Replace(".enc2", "").Replace(".enc4", "") : o.OutputFilename;
+                            AnsiConsole.MarkupLine($"[bold]Source:[/] {srcDecrypt}");
+                            AnsiConsole.MarkupLine($"[bold]Destination:[/] {destDecrypt}");
                             
                             AnsiConsole.Progress()
                                 .Columns(new TaskDescriptionColumn(),
@@ -164,6 +166,8 @@ namespace Syndical.Application
 
                             var dest = string.IsNullOrEmpty(o.OutputFilename) ? info.FileName : o.OutputFilename;
                             var start = File.Exists(dest) ? new FileInfo(dest).Length : 0;
+                            
+                            AnsiConsole.MarkupLine($"[bold]Destination:[/] {dest}");
 
                             AnsiConsole.Progress()
                                 .Columns(new TaskDescriptionColumn(),
