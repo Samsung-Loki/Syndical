@@ -15,7 +15,7 @@ Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3E
 3) Because I'll steal your liver 
 
 ## Warning
-SamLoader's way of resuming is broken. \
+Resume mode might work not as expected. \
 Also Samsung ships only two last firmware versions, Fetch is proof.
 
 ## Screenshots
