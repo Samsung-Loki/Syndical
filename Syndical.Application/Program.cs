@@ -239,7 +239,7 @@ namespace Syndical.Application
                                     }
                                     
                                     // Debug
-                                    AnsiConsole.WriteLine($"{BitConverter.ToString(crc.Hash)}/{BitConverter.ToString(info.CrcChecksum)}");
+                                    AnsiConsole.MarkupLine($"[yelloe]Got {BitConverter.ToString(crc.Hash)}/, expected {BitConverter.ToString(info.CrcChecksum)}[/]");
 
                                     // Hash check
                                     hash.Description = crc.Hash!.SequenceEqual(info.CrcChecksum)
