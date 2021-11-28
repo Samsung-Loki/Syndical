@@ -14,6 +14,10 @@ Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3E
 2) Download & Decrypt is a lot faster, as it won't download the entire file and then only decrypt it.
 3) Because I'll steal your liver 
 
+## Warning
+SamLoader's way of resuming is broken. \
+Also Samsung ships only two last firmware versions, Fetch is proof.
+
 ## Screenshots
 ### Download mode
 ![Screenshot_20211127_201356](https://user-images.githubusercontent.com/68467762/143686936-bea4fc37-76ba-4050-a7dc-89dda131abeb.png)
