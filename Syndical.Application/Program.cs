@@ -67,6 +67,91 @@ namespace Syndical.Application
                     switch (o.Mode)
                     {
                         case Mode.DownloadDecrypt:
+                            AnsiConsole.MarkupLine($"[bold]Device:[/] {o.Model}/{o.Region}");
+                            if (string.IsNullOrEmpty(o.FirmwareVersion)) {
+                                AnsiConsole.MarkupLine("[red]Firmware version required![/]");
+                                return;
+                            }
+                            o.FirmwareVersion = o.FirmwareVersion.NormalizeVersion();
+                            AnsiConsole.MarkupLine($"[bold]Firmware:[/] {o.FirmwareVersion}");
+                            
+                            AnsiConsole.MarkupLine("[yellow]Connecting to FUS server...[/]");
+                            var clientDownloadD = new FusClient();
+                            var typeDownloadD = o.FactoryFirmware
+                                ? FirmwareInfo.FirmwareType.Factory
+                                : FirmwareInfo.FirmwareType.Home;
+                            
+                            AnsiConsole.MarkupLine("[yellow]Verifying firmware version...[/]");
+                            if (!Fetcher.FirmwareExists(o.Model, o.Region, o.FirmwareVersion, true)) {
+                                AnsiConsole.MarkupLine("[red]Firmware does not exist![/]");
+                                return;
+                            }
+                            
+                            AnsiConsole.MarkupLine("[yellow]Fetching firmware information...[/]");
+                            var infoD = clientDownloadD.GetFirmwareInformation(o.FirmwareVersion, o.Model,
+                                o.Region, typeDownloadD);
+                            
+                            AnsiConsole.MarkupLine("[yellow]Initializing download...[/]");
+                            clientDownloadD.InitializeDownload(infoD);
+
+                            var destD = string.IsNullOrEmpty(o.OutputFilename) ? infoD.FileName
+                                .Replace(".enc2", "").Replace(".enc4", "") : o.OutputFilename;
+                            var startD = File.Exists(destD) ? new FileInfo(destD).Length : 0;
+                            AnsiConsole.MarkupLine($"[bold]Destination:[/] {destD}");
+                            if (startD > 0) {
+                                AnsiConsole.MarkupLine("[red]Resume is not supported in Download & Decrypt! Delete destrination first.[/]");
+                                return;
+                            }
+
+                            AnsiConsole.Progress()
+                                .Columns(new TaskDescriptionColumn(),
+                                    new ProgressBarColumn(),
+                                    new PercentageColumn(),
+                                    new DownloadedColumn(),
+                                    new TransferSpeedColumn(),
+                                    new RemainingTimeColumn(),
+                                    new ElapsedTimeColumn())
+                                .Start(ctx => {
+                                    // Begin download
+                                    var res = clientDownloadD.DownloadFirmware(infoD);
+                                    AnsiConsole.MarkupLine("[yellow]WANRING: No hash check will be performed.[/]");
+                                    // Initialize block/size variables
+                                    var block = 0x80 * 50;
+                                    var realSize = long.Parse(res.Headers["Content-Length"]!);
+                                    if (realSize != infoD.FileSize)
+                                        AnsiConsole.MarkupLine(
+                                            $"[yellow]Content-Length is different than reported size: {realSize}/{infoD.FileSize}[/]");
+                                    // Tasks
+                                    var task = ctx.AddTask("[yellow]Downloading & Decrypting firmware[/]", maxValue: realSize);
+                                    // Download & Decrypt binary
+                                    using var data = res.GetResponseStream();
+                                    using var file = new FileStream(destD, FileMode.OpenOrCreate);
+                                    using var rj = new RijndaelManaged();
+                                    rj.Mode = CipherMode.ECB;
+                                    rj.BlockSize = 0x80;
+                                    rj.Padding = PaddingMode.PKCS7;
+                                    rj.Key = infoD.DecryptionKey;
+                                    using var transform = rj.CreateDecryptor();
+                                    using var decryptor = new CryptoStream(data, 
+                                        transform, CryptoStreamMode.Read);
+                                    bool stop = false;
+                                    var buf = new byte[block];
+                                    long readTotal = 0;
+                                    while (!stop) {
+                                        var read = decryptor.Read(buf, 0, buf.Length);
+                                        if (realSize - readTotal < block) stop = true;
+                                        file.Write(buf, 0, read);
+                                        task.Increment(read);
+                                        readTotal += read;
+                                    }
+                                    
+                                    task.Increment(task.MaxValue - task.Value);
+                                    AnsiConsole.MarkupLine($"[green]Firmware download & decryption done![/]");
+
+                                    // Tasks stuff
+                                    task.Description = "[green]Downloading & Decrypting firmware[/]";
+                                    task.StopTask();
+                                });
                             break;
                         case Mode.Decrypt:
                             AnsiConsole.MarkupLine($"[bold]Device:[/] {o.Model}/{o.Region}");
@@ -184,7 +269,7 @@ namespace Syndical.Application
                                     new ElapsedTimeColumn())
                                 .Start(ctx => {
                                     // Begin download
-                                    var res = clientDownload.DownloadFirmware(info);
+                                    var res = clientDownload.DownloadFirmware(info, start);
                                     // Initialize block/size variables
                                     var block = 128;
                                     var realSize = long.Parse(res.Headers["Content-Length"]!);
@@ -199,6 +284,7 @@ namespace Syndical.Application
                                     task.Increment(start);
                                     // Download binary
                                     if (start < realSize) { // Resume
+                                        if (start > 0) AnsiConsole.MarkupLine("[yellow]WANRING: Resume mode might work not as expected.[/]");
                                         using var data = res.GetResponseStream();
                                         using var file = new FileStream(dest, FileMode.OpenOrCreate);
                                         bool stop = false;
