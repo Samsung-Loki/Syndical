@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.ExceptionServices;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -173,18 +174,22 @@ namespace Syndical.Application
                                     new RemainingTimeColumn(),
                                     new ElapsedTimeColumn())
                                 .Start(ctx => {
-                                    var res = clientDownload.DownloadFirmware(info, start);
+                                    // Begin download
+                                    var res = clientDownload.DownloadFirmware(info);
+                                    // Initialize block/size variables
                                     var block = 128;
                                     var realSize = long.Parse(res.Headers["Content-Length"]!);
                                     AnsiConsole.MarkupLine($"[yellow]Download from {start} to {realSize}[/]");
                                     if (realSize != info.FileSize)
                                         AnsiConsole.MarkupLine(
                                             $"[yellow]Content-Length is different than reported size: {realSize}/{info.FileSize}[/]");
+                                    // Tasks
                                     var task = ctx.AddTask("[yellow]Downloading firmware[/]", maxValue: realSize);
                                     var hash = ctx.AddTask("[cyan]Verifying hash[/]", false, realSize)
                                         .IsIndeterminate();
                                     task.Increment(start);
-                                    if (start < realSize) {
+                                    // Download binary
+                                    if (start < realSize) { // Resume
                                         using var data = res.GetResponseStream();
                                         using var file = new FileStream(dest, FileMode.OpenOrCreate);
                                         bool stop = false;
@@ -193,24 +198,30 @@ namespace Syndical.Application
                                         var readTotal = start;
                                         while (!stop) {
                                             var read = data.Read(buf, 0, buf.Length);
-                                            if (realSize - readTotal < block) stop = true;
+                                            if (realSize - readTotal < block) {
+                                                stop = true;
+                                                read = (int)(realSize - readTotal); // We get more than we expect
+                                            }
                                             file.Write(buf, 0, read);
                                             task.Increment(read);
                                             readTotal += read;
                                         }
                                         AnsiConsole.MarkupLine($"[green]Firmware download done![/]");
-                                    } else if (start > realSize) {
+                                    } else if (start > realSize) { // Overflow check
                                         throw new InvalidOperationException(
                                             "Overflow! File size is bigger than expected.");
-                                    } else {
+                                    } else { // Skip downloading
                                         AnsiConsole.MarkupLine($"[yellow]Skipping firmware download...[/]");
                                     }
 
+                                    // Tasks stuff
                                     task.Description = "[green]Downloading firmware[/]";
                                     task.StopTask();
                                     hash.StartTask();
                                     hash.IsIndeterminate(false);
                                     hash.Description = "[yellow]Verifying hash[/]";
+                                    
+                                    // Verify hash
                                     using var crc = new Crc32();
                                     using (Stream file = new FileStream(dest, FileMode.Open, FileAccess.Read)) {
                                         bool stop = false;
@@ -227,8 +238,10 @@ namespace Syndical.Application
                                         AnsiConsole.MarkupLine($"[green]Firmware download done![/]");
                                     }
                                     
+                                    // Debug
                                     AnsiConsole.WriteLine($"{BitConverter.ToString(crc.Hash)}/{BitConverter.ToString(info.CrcChecksum)}");
 
+                                    // Hash check
                                     hash.Description = crc.Hash!.SequenceEqual(info.CrcChecksum)
                                         ? "[green]Hash is valid![/]"
                                         : "[red]Hash mismatch![/]";

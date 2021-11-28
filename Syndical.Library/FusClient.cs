@@ -63,7 +63,7 @@ namespace Syndical.Library
             req.Headers.Add("Authorization", $"FUS nonce=\"{_encryptedNonce.ToUtf8String()}\", " +
                                              $"signature=\"{_token.ToUtf8String()}\", nc=\"\", type=\"\", realm=\"\", newauth=\"1\"");
             req.Headers.Add("Cache-Control", "no-cache");
-            req.Headers.Add("Range", $"bytes={start}-");
+            if (start > 0) req.Headers.Add("Range", $"bytes={start}-");
             if (!string.IsNullOrEmpty(data)) {
                 byte[] buf = Encoding.ASCII.GetBytes(data); // ASCII here, why?
                 using (Stream stream = req.GetRequestStream())
