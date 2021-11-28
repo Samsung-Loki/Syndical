@@ -132,6 +132,7 @@ namespace Syndical.Application
                                         int read = decryptor.Read(buf, 0, buf.Length);
                                         if (realSize - readTotal < block) stop = true;
                                         destStream.Write(buf, 0, read);
+                                        task.Increment(read);
                                         readTotal += read;
                                     }
                                     
