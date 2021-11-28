@@ -46,7 +46,7 @@ namespace Syndical.Library
         /// <param name="data">Request body</param>
         /// <param name="query">Query parameters</param>
         /// <param name="method">HTTP Method</param>
-        /// <param name="start">Range header</param>
+        /// <param name="start">Range header start</param>
         /// <returns>Response body</returns>
         public HttpWebResponse SendRequest([NotNull] string path, [NotNull] string data = "", string query = null, [NotNull] string method = "POST", 
             bool cloud = false, long start = 0)
@@ -63,7 +63,7 @@ namespace Syndical.Library
             req.Headers.Add("Authorization", $"FUS nonce=\"{_encryptedNonce.ToUtf8String()}\", " +
                                              $"signature=\"{_token.ToUtf8String()}\", nc=\"\", type=\"\", realm=\"\", newauth=\"1\"");
             req.Headers.Add("Cache-Control", "no-cache");
-            req.Headers.Add("Range", $"{start}-");
+            req.Headers.Add("Range", $"bytes={start}-");
             if (!string.IsNullOrEmpty(data)) {
                 byte[] buf = Encoding.ASCII.GetBytes(data); // ASCII here, why?
                 using (Stream stream = req.GetRequestStream())
@@ -168,6 +168,7 @@ namespace Syndical.Library
         /// <param name="start">Range header</param>
         /// <returns>Response stream</returns>
         public HttpWebResponse DownloadFirmware([NotNull] FirmwareInfo info, long start = 0)
-            => SendRequest("NF_DownloadBinaryForMass.do", query: $"file={info.CloudModelRoot}{info.FileName}", method: "GET", cloud: true, start: 0);
+            => SendRequest("NF_DownloadBinaryForMass.do", query: $"file={info.CloudModelRoot}{info.FileName}", method: "GET", 
+                cloud: true, start: 0);
     }
 }

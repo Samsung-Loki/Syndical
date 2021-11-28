@@ -174,9 +174,8 @@ namespace Syndical.Application
                                     new ElapsedTimeColumn())
                                 .Start(ctx => {
                                     var res = clientDownload.DownloadFirmware(info, start);
-                                    var block = 800;
+                                    var block = 128;
                                     var realSize = long.Parse(res.Headers["Content-Length"]!);
-                                    var toWrite = realSize - start;
                                     AnsiConsole.MarkupLine($"[yellow]Download from {start} to {realSize}[/]");
                                     if (realSize != info.FileSize)
                                         AnsiConsole.MarkupLine(
@@ -191,15 +190,15 @@ namespace Syndical.Application
                                         bool stop = false;
                                         file.Seek(start, SeekOrigin.Begin);
                                         var buf = new byte[block];
-                                        long readTotal = 0;
-                                        while (!stop)
-                                        {
-                                            int read = data.Read(buf, 0, buf.Length);
-                                            if (toWrite - readTotal < block) stop = true;
+                                        var readTotal = start;
+                                        while (!stop) {
+                                            var read = data.Read(buf, 0, buf.Length);
+                                            if (realSize - readTotal < block) stop = true;
                                             file.Write(buf, 0, read);
                                             task.Increment(read);
                                             readTotal += read;
                                         }
+                                        AnsiConsole.MarkupLine($"[green]Firmware download done![/]");
                                     } else if (start > realSize) {
                                         throw new InvalidOperationException(
                                             "Overflow! File size is bigger than expected.");
@@ -225,7 +224,10 @@ namespace Syndical.Application
                                             hash.Increment(read);
                                             readTotal += read;
                                         }
+                                        AnsiConsole.MarkupLine($"[green]Firmware download done![/]");
                                     }
+                                    
+                                    AnsiConsole.WriteLine($"{BitConverter.ToString(crc.Hash)}/{BitConverter.ToString(info.CrcChecksum)}");
 
                                     hash.Description = crc.Hash!.SequenceEqual(info.CrcChecksum)
                                         ? "[green]Hash is valid![/]"
