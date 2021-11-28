@@ -235,7 +235,7 @@ namespace Syndical.Application
                                             hash.Increment(read);
                                             readTotal += read;
                                         }
-                                        AnsiConsole.MarkupLine($"[green]Firmware download done![/]");
+                                        AnsiConsole.MarkupLine($"[green]Firmware verification done![/]");
                                     }
                                     
                                     // Debug
