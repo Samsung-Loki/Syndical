@@ -50,10 +50,10 @@ namespace Syndical.Application
             [Option('f', "factory", Required = false, HelpText = "Download factory firmware (Binary Nature)")]
             public bool FactoryFirmware { get; set; }
             
-            [Option('h', "disable-hash-check", Required = false, HelpText = "Disables hash check in Download mode")]
+            [Option('hd', "disable-hash-check", Required = false, HelpText = "Disables hash check in Download mode")]
             public bool DisableHashCheck { get; set; }
             
-            [Option('r', "disable-resume", Required = false, HelpText = "Disables resume in Download mode")]
+            [Option('rd', "disable-resume", Required = false, HelpText = "Disables resume in Download mode")]
             public bool DisableResume { get; set; }
         }
         
