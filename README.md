@@ -24,9 +24,9 @@ Also Samsung ships only two last firmware versions, Fetch is proof.
 ### Fetch mode
 ![Screenshot_20211127_201618](https://user-images.githubusercontent.com/68467762/143686992-f2bcc648-7538-44eb-acb0-c4f1ba5e5446.png)
 ### Decrypt mode
-Sorry! It is in development.
+![Screenshot_20211128_145859](https://user-images.githubusercontent.com/68467762/143763448-214d8ff9-05d1-497f-bc46-13cc8ffd5b7b.png)
 ### Download & Decrypt mode
-Sorry! It is in development.
+![Screenshot_20211128_145753](https://user-images.githubusercontent.com/68467762/143763417-260fc681-dca5-4fb4-9252-527e780ecfd7.png)
 
 ## How to use
 ### Arguments
@@ -57,6 +57,10 @@ Download:
 Decrypt: 
 ```
 ./Syndical.Application -m Decrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
+```
+Download & Decrypt: 
+```
+./Syndical.Application -m DownloadDecrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
 ```
 Fetch device firmware list: 
 ```
