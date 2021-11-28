@@ -31,11 +31,7 @@ namespace Syndical.Application
         {
             [Option('m', "mode", Required = true, HelpText = "Which mode I should use")]
             public Mode Mode { get; set; }
-            
-            [Option('V', "encrypt-version", SetName = "Decryption", Required = false, 
-                HelpText = "Encryption method version", Default = FirmwareInfo.DecryptVersion.V4)]
-            public FirmwareInfo.DecryptVersion EncryptionVersion { get; set; }
-            
+
             [Option('v', "firmware-version", Required = false, HelpText = "Firmware version")]
             public string FirmwareVersion { get; set; }
 
@@ -51,8 +47,14 @@ namespace Syndical.Application
             [Option('r', "region", Required = true, HelpText = "Device region")]
             public string Region { get; set; }
             
-            [Option('f', "factory", Required = false, HelpText = "Download factory firmware (BINARY_NATURE = 1)")]
+            [Option('f', "factory", Required = false, HelpText = "Download factory firmware (Binary Nature)")]
             public bool FactoryFirmware { get; set; }
+            
+            [Option('h', "disable-hash-check", Required = false, HelpText = "Disables hash check in Download mode")]
+            public bool DisableHashCheck { get; set; }
+            
+            [Option('r', "disable-resume", Required = false, HelpText = "Disables resume in Download mode")]
+            public bool DisableResume { get; set; }
         }
         
         /// <summary>
@@ -99,7 +101,7 @@ namespace Syndical.Application
                             var startD = File.Exists(destD) ? new FileInfo(destD).Length : 0;
                             AnsiConsole.MarkupLine($"[bold]Destination:[/] {destD}");
                             if (startD > 0) {
-                                AnsiConsole.MarkupLine("[red]Resume is not supported in Download & Decrypt! Delete destrination first.[/]");
+                                AnsiConsole.MarkupLine("[red]Resume is not supported! Delete destrination file first.[/]");
                                 return;
                             }
 
@@ -256,6 +258,10 @@ namespace Syndical.Application
 
                             var dest = string.IsNullOrEmpty(o.OutputFilename) ? info.FileName : o.OutputFilename;
                             var start = File.Exists(dest) ? new FileInfo(dest).Length : 0;
+                            if (start > 0 && o.DisableResume) {
+                                AnsiConsole.MarkupLine("[red]Resume was disabled! Delete destrination file first.[/]");
+                                return;
+                            }
                             
                             AnsiConsole.MarkupLine($"[bold]Destination:[/] {dest}");
 
@@ -281,6 +287,11 @@ namespace Syndical.Application
                                     var task = ctx.AddTask("[yellow]Downloading firmware[/]", maxValue: realSize);
                                     var hash = ctx.AddTask("[cyan]Verifying hash[/]", false, realSize)
                                         .IsIndeterminate();
+                                    if (o.DisableHashCheck) {
+                                        hash.IsIndeterminate(false);
+                                        hash.Increment(realSize);
+                                        hash.Description = "[green]Hash check disabled[/]";
+                                    }
                                     task.Increment(start);
                                     // Download binary
                                     if (start < realSize) { // Resume
@@ -312,6 +323,9 @@ namespace Syndical.Application
                                     // Tasks stuff
                                     task.Description = "[green]Downloading firmware[/]";
                                     task.StopTask();
+                                    
+                                    // Hash check task stuff
+                                    if (o.DisableHashCheck) return;
                                     hash.StartTask();
                                     hash.IsIndeterminate(false);
                                     hash.Description = "[yellow]Verifying hash[/]";
