@@ -113,7 +113,7 @@ namespace Syndical.Application
                                     if (realSize != infoDecrypt.FileSize)
                                         AnsiConsole.MarkupLine(
                                             $"[yellow]File size is different than reported size: {realSize}/{infoDecrypt.FileSize}[/]");
-                                    var task = ctx.AddTask("[yellow]Decrypting firmware[/]").IsIndeterminate();
+                                    var task = ctx.AddTask("[yellow]Decrypting firmware[/]", maxValue: realSize);
                                     using var srcStream = new FileStream(srcDecrypt, FileMode.Open, FileAccess.Read);
                                     using var destStream = new FileStream(destDecrypt, FileMode.Create, FileAccess.Write);
                                     using var rj = new RijndaelManaged();
@@ -121,8 +121,10 @@ namespace Syndical.Application
                                     rj.BlockSize = 0x80;
                                     rj.Padding = PaddingMode.PKCS7;
                                     rj.Key = infoDecrypt.DecryptionKey;
+                                    destStream.Seek(0, SeekOrigin.Begin);
+                                    using var transform = rj.CreateDecryptor();
                                     using var decryptor = new CryptoStream(srcStream, 
-                                        rj.CreateDecryptor(), CryptoStreamMode.Read);
+                                        transform, CryptoStreamMode.Read);
                                     bool stop = false;
                                     var buf = new byte[block];
                                     long readTotal = 0;
@@ -130,10 +132,10 @@ namespace Syndical.Application
                                         int read = decryptor.Read(buf, 0, buf.Length);
                                         if (realSize - readTotal < block) stop = true;
                                         destStream.Write(buf, 0, read);
-                                        task.Increment(read);
                                         readTotal += read;
                                     }
-
+                                    
+                                    task.Increment(task.MaxValue - task.Value);
                                     task.Description = "[green]Decrypting firmware[/]";
                                     task.StopTask();
                                 });
