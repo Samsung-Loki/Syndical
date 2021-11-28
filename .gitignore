@@ -1,6 +1,7 @@
 # Syndical-specific stuff
 *.zip*
 stacktrace.log
+*.tar*
 
 # User specific
 **/.idea/**/workspace.xml
