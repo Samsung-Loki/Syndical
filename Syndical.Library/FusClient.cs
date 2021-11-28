@@ -26,9 +26,9 @@ namespace Syndical.Library
         public const string FusServerLink = "https://neofussvr.sslcs.cdngc.net/";
         
         // Authentication stuff
-        private byte[] _encryptedNonce = Array.Empty<byte>();
-        private byte[] _nonce = Array.Empty<byte>();
-        private byte[] _token = Array.Empty<byte>();
+        private string _encryptedNonce = "";
+        private string _nonce = "";
+        private string _token = "";
         private string _sessionId = "";
 
         /// <summary>
@@ -60,12 +60,12 @@ namespace Syndical.Library
             req.ReadWriteTimeout = 0x61a8;
             req.Timeout = 0x61a8;
             req.Method = method;
-            req.Headers.Add("Authorization", $"FUS nonce=\"{_encryptedNonce.ToUtf8String()}\", " +
-                                             $"signature=\"{_token.ToUtf8String()}\", nc=\"\", type=\"\", realm=\"\", newauth=\"1\"");
+            req.Headers.Add("Authorization", $"FUS nonce=\"{_encryptedNonce}\", " +
+                                             $"signature=\"{_token}\", nc=\"\", type=\"\", realm=\"\", newauth=\"1\"");
             req.Headers.Add("Cache-Control", "no-cache");
             if (start > 0) req.Headers.Add("Range", $"bytes={start}-");
             if (!string.IsNullOrEmpty(data)) {
-                byte[] buf = Encoding.ASCII.GetBytes(data); // ASCII here, why?
+                byte[] buf = Encoding.ASCII.GetBytes(data);
                 using (Stream stream = req.GetRequestStream())
                     stream.Write(buf, 0, buf.Length);
                 req.ContentLength = buf.Length;
@@ -75,7 +75,7 @@ namespace Syndical.Library
             req.CookieContainer.Add(new Uri(url), new Cookie("JSESSIONID", _sessionId));
             var res = (HttpWebResponse)req.GetResponse();
             if (res.Headers.AllKeys.Contains("NONCE") && res.Headers["NONCE"] != null) {
-                _encryptedNonce = res.Headers["NONCE"].ToUtf8Bytes();
+                _encryptedNonce = res.Headers["NONCE"];
                 _nonce = Crypto.DecryptNonce(_encryptedNonce);
                 _token = Crypto.NonceToToken(_nonce);
             }
@@ -137,7 +137,7 @@ namespace Syndical.Library
                 {"DEVICE_FW_VERSION", version},
                 {"DEVICE_LOCAL_CODE", region},
                 {"DEVICE_MODEL_NAME", model},
-                {"LOGIC_CHECK", Crypto.GetLogicCheck(version.ToUtf8Bytes(), _nonce).ToUtf8String()}
+                {"LOGIC_CHECK", Crypto.GetLogicCheck(version, _nonce).ToAsciiString()}
             });
             var doc = new XmlDocument();
             var str = SendRequest("NF_DownloadBinaryInform.do", xml).GetString();
@@ -155,7 +155,7 @@ namespace Syndical.Library
                 {"BINARY_FILE_NAME", info.FileName},
                 {"LOGIC_CHECK", Crypto.GetLogicCheck(string.Join("",         // Logic check out of filename without
                     info.FileName.Split(".")[0].TakeLast(16).ToArray())!  // the extension and use only 
-                    .ToUtf8Bytes(), _nonce).ToUtf8String()}                       // last 16 characters
+                    , _nonce).ToAsciiString()}                                    // last 16 characters
             }); 
             
             SendRequest("NF_DownloadBinaryInitForMass.do", xml);

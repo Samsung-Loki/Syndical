@@ -113,18 +113,20 @@ namespace Syndical.Application
                                     if (realSize != infoDecrypt.FileSize)
                                         AnsiConsole.MarkupLine(
                                             $"[yellow]File size is different than reported size: {realSize}/{infoDecrypt.FileSize}[/]");
-                                    var task = ctx.AddTask("[yellow]Downloading firmware[/]", maxValue: realSize);
+                                    var task = ctx.AddTask("[yellow]Decrypting firmware[/]").IsIndeterminate();
                                     using var srcStream = new FileStream(srcDecrypt, FileMode.Open, FileAccess.Read);
-                                    using var destStream = new FileStream(destDecrypt, FileMode.OpenOrCreate, FileAccess.Write);
+                                    using var destStream = new FileStream(destDecrypt, FileMode.Create, FileAccess.Write);
                                     using var rj = new RijndaelManaged();
                                     rj.Mode = CipherMode.ECB;
+                                    rj.BlockSize = 0x80;
                                     rj.Padding = PaddingMode.PKCS7;
-                                    using var decryptor = new CryptoStream(srcStream, rj.CreateDecryptor(), CryptoStreamMode.Read);
+                                    rj.Key = infoDecrypt.DecryptionKey;
+                                    using var decryptor = new CryptoStream(srcStream, 
+                                        rj.CreateDecryptor(), CryptoStreamMode.Read);
                                     bool stop = false;
                                     var buf = new byte[block];
                                     long readTotal = 0;
-                                    while (!stop)
-                                    {
+                                    while (!stop) {
                                         int read = decryptor.Read(buf, 0, buf.Length);
                                         if (realSize - readTotal < block) stop = true;
                                         destStream.Write(buf, 0, read);

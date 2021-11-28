@@ -67,9 +67,9 @@ namespace Syndical.Library
         /// </summary>
         /// <param name="nonce">Nonce</param>
         /// <returns>AES key</returns>
-        private static byte[] NonceToKey(byte[] nonce)
+        private static byte[] NonceToKey(string nonce)
         {
-            var str = nonce.ToUtf8String();
+            var str = nonce;
             var sb = new StringBuilder();
             foreach (char chr in str.Take(16))
                 sb.Append(Key1[char.ConvertToUtf32(chr.ToString(), 0) % 16]);
@@ -83,12 +83,14 @@ namespace Syndical.Library
         /// <param name="input">Input</param>
         /// <param name="nonce">Nonce</param>
         /// <returns>LOGIC_CHECK value</returns>
-        public static byte[] GetLogicCheck(byte[] input, byte[] nonce)
+        public static byte[] GetLogicCheck(string input, string nonce)
         {
             var sb = new StringBuilder();
-            foreach (char chr in nonce.ToUtf8String())
-                sb.Append(input.ToUtf8String()[char.ConvertToUtf32(chr.ToString(), 0) & 0xf]);
-            return sb.ToString().ToUtf8Bytes();
+            foreach (char chr in nonce) {
+                var convert = chr & '\x000f';
+                sb.Append(input[convert]);
+            }
+            return sb.ToString().ToAsciiBytes();
         }
 
         /// <summary>
@@ -96,16 +98,16 @@ namespace Syndical.Library
         /// </summary>
         /// <param name="nonce">Nonce</param>
         /// <returns>Response token</returns>
-        public static byte[] NonceToToken(byte[] nonce)
-            => Convert.ToBase64String(Encrypt(nonce, NonceToKey(nonce))).ToUtf8Bytes();
+        public static string NonceToToken(string nonce)
+            => Convert.ToBase64String(Encrypt(Encoding.UTF8.GetBytes(nonce), NonceToKey(nonce)));
 
         /// <summary>
         /// Decrypt nonce using Key 1
         /// </summary>
         /// <param name="nonce">Nonce</param>
         /// <returns>Decrypted nonce</returns>
-        public static byte[] DecryptNonce(byte[] nonce)
-            => Decrypt(Convert.FromBase64String(nonce.ToUtf8String()), Key1.ToUtf8Bytes());
+        public static string DecryptNonce(string nonce)
+            => Encoding.UTF8.GetString(Decrypt(Convert.FromBase64String(nonce), Key1.ToAsciiBytes()));
 
         /// <summary>
         /// Get key for version 2 encryption
@@ -129,7 +131,7 @@ namespace Syndical.Library
             var nonce = xml.DocumentElement?.SelectSingleNode(type == FirmwareInfo.FirmwareType.Factory 
                 ? "./FUSBody/Put/LOGIC_VALUE_FACTORY/Data" 
                 : "./FUSBody/Put/LOGIC_VALUE_HOME/Data")?.InnerText;
-            return GetLogicCheck(input.ToUtf8Bytes(), nonce.ToUtf8Bytes()).GetMd5Hash();
+            return GetLogicCheck(input, nonce).GetMd5Hash();
         }
     }
 }

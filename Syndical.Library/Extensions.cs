@@ -49,7 +49,7 @@ namespace Syndical.Library
         {
             // Use input string to calculate MD5 hash
             using var md5 = MD5.Create();
-            byte[] inputBytes = source.ToUtf8Bytes();
+            byte[] inputBytes = source.ToAsciiBytes();
             byte[] hashBytes = md5.ComputeHash(inputBytes);
             return hashBytes;
         }
@@ -72,15 +72,15 @@ namespace Syndical.Library
         /// </summary>
         /// <param name="source">Source</param>
         /// <returns>UTF-8 byte sequence</returns>
-        public static byte[] ToUtf8Bytes(this string source)
-            => Encoding.UTF8.GetBytes(source);
+        public static byte[] ToAsciiBytes(this string source)
+            => Encoding.ASCII.GetBytes(source);
         
         /// <summary>
         /// Convert UTF-8 byte sequence to string
         /// </summary>
         /// <param name="source">Source</param>
         /// <returns>String</returns>
-        public static string ToUtf8String(this byte[] source)
-            => Encoding.UTF8.GetString(source);
+        public static string ToAsciiString(this byte[] source)
+            => Encoding.ASCII.GetString(source);
     }
 }
