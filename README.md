@@ -31,16 +31,17 @@ Also Samsung ships only two last firmware versions, Fetch is proof.
 ## How to use
 ### Arguments
 ```
-  -m, --mode                Required. Which mode I should use
-  -V, --encrypt-version     (Default: V4) Encryption method version
-  -v, --firmware-version     Firmware version
-  -i, --input               File to decrypt
-  -o, --output              Filename for decrypted/downloaded file
-  -M, --model               Required. Device model
-  -r, --region              Required. Device region
-  -f, --factory             Download factory firmware (BINARY_NATURE = 1)
-  --help                    Display this help screen.
-  --version                 Display version information.
+  -m, --mode                  Required. Which mode I should use
+  -v, --firmware-version       Firmware version
+  -i, --input                 File to decrypt
+  -o, --output                Filename for decrypted/downloaded file
+  -M, --model                 Required. Device model
+  -r, --region                Required. Device region
+  -f, --factory               Download factory firmware (Binary Nature)
+  -h, --disable-hash-check    Disables hash check in Download mode
+  -r, --disable-resume        Disables resume in Download mode
+  --help                      Display this help screen.
+  --version                   Display version information.
 ```
 ### Modes
 ```
