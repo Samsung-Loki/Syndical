@@ -348,7 +348,7 @@ namespace Syndical.Application
                                     }
                                     
                                     // Debug
-                                    AnsiConsole.MarkupLine($"[yelloe]Got {BitConverter.ToString(crc.Hash)}/, expected {BitConverter.ToString(info.CrcChecksum)}[/]");
+                                    AnsiConsole.MarkupLine($"[yellow]Got {BitConverter.ToString(crc.Hash)}/, expected {BitConverter.ToString(info.CrcChecksum)}[/]");
 
                                     // Hash check
                                     hash.Description = crc.Hash!.SequenceEqual(info.CrcChecksum)
