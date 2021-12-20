@@ -9,6 +9,10 @@ This is an alternative to [SamLoader](https://github.com/nlscc/samloader) - clea
 Written purely in C#. [SamLoader](https://github.com/nlscc/samloader) was, of course, the base of Syndical, but impemented differently. \
 Current progress can be viewed here: [Trello board](https://trello.com/b/3kekg3El/syndical).
 
+## OSS Licence
+We use a free OSS licence from JetBrains to develop Hreidmar. \
+You can apply to get one [here](https://jb.gg/OpenSourceSupport)
+
 ## Why I should use Syndical?
 1) It looks a lot better than any other firmware downloaders
 2) Download & Decrypt is a lot faster, as it won't download the entire file and then only decrypt it.
