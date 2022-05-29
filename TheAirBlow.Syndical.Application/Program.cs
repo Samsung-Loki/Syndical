@@ -10,7 +10,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using CommandLine;
 using Spectre.Console;
-using Syndical.Library;
+using TheAirBlow.Syndical.Library;
 
 namespace Syndical.Application
 {

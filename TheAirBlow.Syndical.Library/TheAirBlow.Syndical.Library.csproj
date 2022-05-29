@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+        <Title>Syndical Library</Title>
+        <Authors>TheAirBlow</Authors>
+        <Description>Samsung firmware downloader and decrypter</Description>
+        <Copyright>Copyright © TheAirBlow 2022</Copyright>
+        <PackageProjectUrl>https://samsung-loki.github.io/syndical-web</PackageProjectUrl>
+        <PackageLicenseUrl>https://github.com/Samsung-Loki/Syndical/blob/main/LICENCE</PackageLicenseUrl>
+        <RepositoryUrl>https://github.com/Samsung-Loki/Syndical</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>samsung firmware download decrypt cryptography web</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Serilog" Version="2.10.0" />
+      <PackageReference Include="Serilog.Exceptions" Version="8.0.0" />
+      <PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
+    </ItemGroup>
+
+</Project>

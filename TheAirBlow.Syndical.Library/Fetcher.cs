@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using System.Xml;
 
-namespace Syndical.Library
+namespace TheAirBlow.Syndical.Library
 {
     /// <summary>
     /// FOTA Cloud fetcher

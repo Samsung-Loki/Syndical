@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 
-namespace Syndical.Library
+namespace TheAirBlow.Syndical.Library
 {
     /// <summary>
     /// FOTA cloud device firmware history

@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Xml;
 
-namespace Syndical.Library
+namespace TheAirBlow.Syndical.Library
 {
     /// <summary>
     /// Firmware information

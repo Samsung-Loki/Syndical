@@ -5,7 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 
-namespace Syndical.Library
+namespace TheAirBlow.Syndical.Library
 {
     /// <summary>
     /// Cryptography helper

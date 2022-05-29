@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
 
-namespace Syndical.Library
+namespace TheAirBlow.Syndical.Library
 {
     /// <summary>
     /// FUS client

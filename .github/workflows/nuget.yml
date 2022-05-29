@@ -1,0 +1,26 @@
+name: Publish Packages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    if: ${{!(contains(github.event.head_commit.message, '[NuGet]'))}}
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.17
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    - name: Publish TheAirBlow.Syndical.Library
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+          PROJECT_FILE_PATH: TheAirBlow.Syndical.Library/TheAirBlow.Syndical.Library.csproj
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}

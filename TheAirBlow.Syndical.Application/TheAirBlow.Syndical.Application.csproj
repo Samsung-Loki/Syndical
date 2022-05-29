@@ -7,6 +7,7 @@
         <Product>Syndical</Product>
         <AssemblyVersion>1.0.0</AssemblyVersion>
         <FileVersion>1.0.0</FileVersion>
+        <RootNamespace>Syndical.Application</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Syndical.Library\Syndical.Library.csproj" />
+      <ProjectReference Include="..\TheAirBlow.Syndical.Library\TheAirBlow.Syndical.Library.csproj" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 
-namespace Syndical.Library
+namespace TheAirBlow.Syndical.Library
 {
     public sealed class Crc32 : HashAlgorithm
     {

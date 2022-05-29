@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syndical.Application", "Syndical.Application\Syndical.Application.csproj", "{40B26291-63DE-4509-BE43-F57391B25AD8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheAirBlow.Syndical.Application", "TheAirBlow.Syndical.Application\TheAirBlow.Syndical.Application.csproj", "{40B26291-63DE-4509-BE43-F57391B25AD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Syndical.Library", "Syndical.Library\Syndical.Library.csproj", "{0DB10DE0-B3E1-40FE-9C11-27A494B1F27F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheAirBlow.Syndical.Library", "TheAirBlow.Syndical.Library\TheAirBlow.Syndical.Library.csproj", "{0DB10DE0-B3E1-40FE-9C11-27A494B1F27F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
