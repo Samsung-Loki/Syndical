@@ -19,8 +19,7 @@ You can apply to get one [here](https://jb.gg/OpenSourceSupport)
 3) Because I'll steal your liver 
 
 ## Warning
-Resume mode might work not as expected. \
-Also Samsung ships only two last firmware versions, Fetch is proof.
+Samsung ships only two last firmware versions, Fetch is proof.
 
 ## Screenshots
 ### Download mode
