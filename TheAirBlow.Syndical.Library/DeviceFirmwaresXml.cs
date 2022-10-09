@@ -44,7 +44,7 @@ namespace TheAirBlow.Syndical.Library
             /// <summary>
             /// Android version
             /// </summary>
-            public int AndroidVersion;
+            public double AndroidVersion;
 
             /// <summary>
             /// Firmware version
@@ -78,7 +78,7 @@ namespace TheAirBlow.Syndical.Library
             var latestNode = versionsRoot.SelectSingleNode("./latest");
             if (latestNode?.Attributes?["o"]?.InnerText == null || latestNode.InnerText == null)
                 throw new InvalidOperationException("Invalid DeviceFirmwaresXml XML!");
-            info.Latest.AndroidVersion = int.Parse(latestNode.Attributes["o"].InnerText);
+            info.Latest.AndroidVersion = double.Parse(latestNode.Attributes["o"].InnerText);
             info.Latest.Version = latestNode.InnerText;
             info.Latest.NormalizedVersion = latestNode.InnerText.NormalizeVersion();
             // Old firmware
