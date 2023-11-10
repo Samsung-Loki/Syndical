@@ -22,7 +22,7 @@ namespace TheAirBlow.Syndical.Library
         public const string InitializeDownloadEndpoint = "NF_DownloadBinaryInitForMass.do";
         public const string BinaryInformationEndpoint = "NF_DownloadBinaryInform.do";
         public const string BinaryDownloadEndpoint = "NF_DownloadBinaryForMass.do";
-        public const string CloudFusServerLink = "http://cloud-neofussvr.sslcs.cdngc.net/";
+        public const string CloudFusServerLink = "http://cloud-neofussvr.samsungmobile.com/";
         public const string FusServerLink = "https://neofussvr.sslcs.cdngc.net/";
         
         // Authentication stuff
