@@ -12,8 +12,8 @@ namespace TheAirBlow.Syndical.Library
     /// </summary>
     public static class Crypto
     {
-        private const string Key1 = "hqzdurufm2c8mf6bsjezu1qgveouv7c7";
-        private const string Key2 = "w13r4cvf4hctaujv";
+        private const string Key1 = "vicopx7dqu06emacgpnpy8j8zwhduwlh";
+        private const string Key2 = "9u7qab84rpc16gvk";
         
         /// <summary>
         /// AES encryption (CBC mode, PKCS#7 padding)
