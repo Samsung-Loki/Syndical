@@ -46,6 +46,9 @@ namespace Syndical.Application
             
             [Option('r', "region", Required = true, HelpText = "Device region")]
             public string Region { get; set; }
+
+            [Option('I', "imei", Required = true, HelpText = "Device serial or imei number")]
+            public string Imei { get; set; }
             
             [Option('f', "factory", Required = false, HelpText = "Download factory firmware (Binary Nature)")]
             public bool FactoryFirmware { get; set; }
@@ -91,7 +94,7 @@ namespace Syndical.Application
                             
                             AnsiConsole.MarkupLine("[yellow]Fetching firmware information...[/]");
                             var infoD = clientDownloadD.GetFirmwareInformation(o.FirmwareVersion, o.Model,
-                                o.Region, typeDownloadD);
+                                o.Region, o.Imei, typeDownloadD);
                             
                             AnsiConsole.MarkupLine("[yellow]Initializing download...[/]");
                             clientDownloadD.InitializeDownload(infoD);
@@ -178,7 +181,7 @@ namespace Syndical.Application
                             
                             AnsiConsole.MarkupLine("[yellow]Fetching firmware information...[/]");
                             var infoDecrypt = clientDecrypt.GetFirmwareInformation(o.FirmwareVersion, o.Model,
-                                o.Region, typeDecrypt);
+                                o.Region, o.Imei, typeDecrypt);
                             
                             var srcDecrypt = string.IsNullOrEmpty(o.InputFilename) ? infoDecrypt.FileName : o.InputFilename;
                             var destDecrypt = string.IsNullOrEmpty(o.OutputFilename) ? infoDecrypt.FileName
@@ -251,7 +254,7 @@ namespace Syndical.Application
                             
                             AnsiConsole.MarkupLine("[yellow]Fetching firmware information...[/]");
                             var info = clientDownload.GetFirmwareInformation(o.FirmwareVersion, o.Model,
-                                o.Region, typeDownload);
+                                o.Region, o.Imei, typeDownload);
                             
                             AnsiConsole.MarkupLine("[yellow]Initializing download...[/]");
                             clientDownload.InitializeDownload(info);
@@ -376,12 +379,12 @@ namespace Syndical.Application
                                     task.IsIndeterminate(false);
                                     task.Description = "[green]Fetching firmware information[/]";
                                     task.MaxValue = list.Old.Count + 1;
-                                    var info = new List<FirmwareInfo> { client.GetFirmwareInformation(list.Latest.NormalizedVersion, o.Model, o.Region, type) };
+                                    var info = new List<FirmwareInfo> { client.GetFirmwareInformation(list.Latest.NormalizedVersion, o.Model, o.Region, o.Imei, type) };
                                     task.Increment(1);
                                     foreach (var fw in list.Old) {
                                         try {
                                             info.Add(client.GetFirmwareInformation(fw.NormalizedVersion, o.Model,
-                                                o.Region, type));
+                                                o.Region, o.Imei, type));
                                         } catch {
                                             AnsiConsole.MarkupLine($"[yellow]Unable to fetch firmware for {fw.NormalizedVersion}[/]");
                                             info.Add(new FirmwareInfo { Version = fw.NormalizedVersion, OsVersion = "/UNKNOWN/", FileSize = 0 });

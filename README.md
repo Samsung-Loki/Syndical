@@ -40,6 +40,7 @@ Samsung ships only two last firmware versions, Fetch is proof.
   -o, --output                Filename for decrypted/downloaded file
   -M, --model                 Required. Device model
   -r, --region                Required. Device region
+  -I, --imei                  Required. Device serial or imei number
   -f, --factory               Download factory firmware (Binary Nature)
   -h, --disable-hash-check    Disables hash check in Download mode
   -r, --disable-resume        Disables resume in Download mode
@@ -56,19 +57,19 @@ DownloadDecrypt   Download and decrypt firmware simultaneously
 ### Examples
 Download: 
 ```
-./Syndical.Application -m Download -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
+./Syndical.Application -m Download -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -I 354260115477798 -f
 ```
 Decrypt: 
 ```
-./Syndical.Application -m Decrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
+./Syndical.Application -m Decrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -I 354260115477798 -f
 ```
 Download & Decrypt: 
 ```
-./Syndical.Application -m DownloadDecrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -f
+./Syndical.Application -m DownloadDecrypt -v A207FXXU2CUI2/A207FOXM2CUI2/A207FXXU2CUI2/A207FXXU2CUI2 -M SM-A207F -r SER -I 354260115477798 -f
 ```
 Fetch device firmware list: 
 ```
-./Syndical.Application -m Fetch -M SM-A207F -r SER
+./Syndical.Application -m Fetch -M SM-A207F -r SER -I 354260115477798
 ```
 If `--factory` is present, `BINARY_NATURE` is set to 1 instead of 0. 
 
