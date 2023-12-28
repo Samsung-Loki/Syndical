@@ -126,7 +126,7 @@ namespace TheAirBlow.Syndical.Library
         /// <param name="version">Firmware version</param>
         /// <param name="model">Device model</param>
         /// <param name="region">Device region</param>
-        /// <param name="imei">Device region</param>
+        /// <param name="imei">Device serial or imei number</param>
         /// <param name="type">Firmware type</param>
         /// <returns>Firmware information</returns>
         public FirmwareInfo GetFirmwareInformation(string version, string model, string region, string imei, FirmwareInfo.FirmwareType type)
