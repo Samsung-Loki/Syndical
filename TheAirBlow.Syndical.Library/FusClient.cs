@@ -126,14 +126,15 @@ namespace TheAirBlow.Syndical.Library
         /// <param name="version">Firmware version</param>
         /// <param name="model">Device model</param>
         /// <param name="region">Device region</param>
+        /// <param name="imei">Device serial or imei number</param>
         /// <param name="type">Firmware type</param>
         /// <returns>Firmware information</returns>
-        public FirmwareInfo GetFirmwareInformation(string version, string model, string region, FirmwareInfo.FirmwareType type)
+        public FirmwareInfo GetFirmwareInformation(string version, string model, string region, string imei, FirmwareInfo.FirmwareType type)
         {
             var xml = BuildFusXml(new Dictionary<string, string> {
                 {"ACCESS_MODE", "2"},
                 {"CLIENT_PRODUCT", "Syndical"},
-                {"DEVICE_IMEI_PUSH", "12345678901234"},
+                {"DEVICE_IMEI_PUSH", imei},
                 {"BINARY_NATURE", type == FirmwareInfo.FirmwareType.Factory ? "1" : "0"},
                 {"DEVICE_FW_VERSION", version},
                 {"DEVICE_LOCAL_CODE", region},
